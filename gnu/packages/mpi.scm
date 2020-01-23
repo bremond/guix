@@ -29,16 +29,23 @@
   #:use-module ((guix licenses)
                 #:hide (expat))
   #:use-module (guix download)
+  #:use-module (guix git-download)
   #:use-module (guix utils)
   #:use-module (guix deprecation)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
   #:use-module (gnu packages)
+  #:use-module (gnu packages autogen)
+  #:use-module (gnu packages autotools)
+  #:use-module (gnu packages base)
+  #:use-module (gnu packages bash)
   #:use-module (gnu packages fabric-management)
+  #:use-module (gnu packages gawk)
   #:use-module (gnu packages gcc)
   #:use-module (gnu packages java)
   #:use-module (gnu packages libevent)
   #:use-module (gnu packages linux)
+  #:use-module (gnu packages m4)
   #:use-module (gnu packages pciutils)
   #:use-module (gnu packages xorg)
   #:use-module (gnu packages gtk)
@@ -47,6 +54,7 @@
   #:use-module (gnu packages ncurses)
   #:use-module (gnu packages parallel)
   #:use-module (gnu packages pkg-config)
+  #:use-module (gnu packages version-control)
   #:use-module (gnu packages valgrind)
   #:use-module (srfi srfi-1)
   #:use-module (ice-9 match))
@@ -393,3 +401,103 @@ supports point-to-point and collective communications of any picklable Python
 object as well as optimized communications of Python objects (such as NumPy
 arrays) that expose a buffer interface.")
     (license bsd-3)))
+
+(define-public mpich
+   (package
+     (name "mpich")
+     (version "3.4a2")
+     (source (origin
+               (method git-fetch)
+               (uri (git-reference
+                     (url "https://github.com/pmodels/mpich")
+                     (commit "644051d13dc20aecd460ba3db088756659c3dad3") ; tag v3.4a2
+                     (recursive? #t)))
+               (sha256
+                (base32
+                 "02ildr7wh40q1qaq5k8npb6vw6kv9szmrm3lspr6skqa5csmrrxw"))))
+     (build-system gnu-build-system)
+     (inputs
+      `(("libnuma" ,numactl))) ; for ch4:ucx
+     (native-inputs
+      `(("gawk" ,gawk)
+        ("bash" ,bash)
+        ("diffutils" ,diffutils)
+        ("git" ,git)
+        ("sed" ,sed)
+        ("perl" ,perl)
+        ("patch" ,patch)
+        ("findutils" ,findutils)
+        ("m4" ,m4)
+        ("grep" ,grep)
+        ("which" ,which)
+        ("gfortran" ,gfortran)
+        ("gcc" ,gcc)
+        ("gnu-make" ,gnu-make)
+        ("autoconf" ,autoconf)
+        ("automake" ,automake)
+        ("libtool" ,libtool)
+        ("autogen" ,autogen)
+        ("zlib" ,(@ (gnu packages compression) zlib))))
+     (outputs '("out" "debug"))
+     (arguments
+      `(#:modules ((ice-9 match)
+                   (ice-9 popen)
+                   (srfi srfi-1)
+                   ,@%gnu-build-system-modules)
+        #:configure-flags
+        '("--disable-dependency-tracking"
+          "--enable-debuginfo"
+          "--with-device=ch4:ucx") ; --with-device=ch4:ofi segfault in tests
+        #:phases
+        (modify-phases %standard-phases
+          (add-after 'unpack 'patch-sources
+            (lambda _
+              (substitute* "./maint/gen_subcfg_m4"
+                (("/usr/bin/env") (which "env")))
+              (substitute* "src/glue/romio/all_romio_symbols"
+                (("/usr/bin/env") (which "env")))
+              (substitute* (find-files "." "buildiface")
+                (("/usr/bin/env") (which "env")))
+              (substitute* "maint/extracterrmsgs"
+                (("/usr/bin/env") (which "env")))
+              (substitute* (find-files "." "f77tof90")
+                (("/usr/bin/env") (which "env")))
+              (substitute* (find-files "." "\\.sh$")
+                (("/bin/sh") (which "sh")))))
+          (add-after 'bootstrap 'patch-after-bootstrap
+                     (lambda _
+                       (use-modules (ice-9 popen)
+                                    (ice-9 rdelim))
+                       (substitute* "maint/configure"
+                                    (("/bin/sh") (which "sh")))
+                       (with-directory-excursion
+                        "maint"
+                        (invoke "sh" "./configure")
+                        (let ((cvardirs
+                               (let* ((p (open-pipe* OPEN_READ
+                                                     "cat" "cvardirs"))
+                                      (l (read-line p)))
+                                 (and (zero? (close-pipe p)) l))))
+                          (invoke "perl" "extractcvars" "--dirs" cvardirs))))))))
+     (home-page "https://www.mpich.org/")
+     (synopsis "MPICH is a high performance and widely portable
+implementation of the Message Passing Interface (MPI) standard.")
+     (description "MPICH is a high-performance and widely portable
+implementation of the Message Passing Interface (MPI) standard (MPI-1,
+MPI-2 and MPI-3). The goals of MPICH are: (1) to provide an MPI
+implementation that efficiently supports different computation and
+communication platforms including commodity clusters (desktop systems,
+shared-memory systems, multicore architectures), high-speed
+networks (10 Gigabit Ethernet, InfiniBand, Myrinet, Quadrics) and
+proprietary high-end computing systems (Blue Gene, Cray) and (2) to
+enable cutting-edge research in MPI through an easy-to-extend modular
+framework for other derived implementations.")
+     (license bsd-2)))
+
+(define-public python-mpi4py-mpich
+  (package
+    (inherit python-mpi4py)
+    (name "python-mpi4py-mpich")
+    (inputs
+     `(("mpi" ,mpich)
+       ,@(alist-delete "mpi" (package-inputs python-mpi4py))))))

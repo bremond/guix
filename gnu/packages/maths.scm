@@ -643,6 +643,14 @@ singular value problems.")
     (license (license:non-copyleft "file://LICENSE"
                                    "See LICENSE in the distribution."))))
 
+(define-public scalapack-mpich
+  (package
+    (inherit scalapack)
+    (name "scalapack-mpich")
+    (inputs
+     `(("mpi" ,mpich)
+       ,@(alist-delete "mpi" (package-inputs scalapack))))))
+
 (define-public gnuplot
   (package
     (name "gnuplot")
@@ -2371,6 +2379,24 @@ sparse system of linear equations A x = b using Gaussian elimination.")
     (inputs
      (alist-delete "pt-scotch" (package-inputs mumps-openmpi)))))
 
+(define-public mumps-mpich
+  (package (inherit mumps)
+    (name "mumps-mpich")
+    (inputs
+     `(("mpi" ,mpich)
+       ("scalapack" ,scalapack-mpich)
+       ("pt-scotch" ,pt-scotch-mpich)
+       ,@(alist-delete "scotch" (package-inputs mumps))))
+    (arguments
+     (substitute-keyword-arguments (package-arguments mumps)
+       ((#:phases phases)
+        `(modify-phases ,phases
+           (replace 'check
+             (lambda _
+               ((assoc-ref ,phases 'check)
+                #:exec-prefix '("mpirun" "-genv" "LD_LIBRARY_PATH" "../lib" "-n" "2" ))))))))
+    (synopsis "Multifrontal sparse direct solver (with MPI)")))
+
 (define-public ruby-asciimath
   (package
     (name "ruby-asciimath")
@@ -2728,6 +2754,14 @@ YACC = bison -pscotchyy -y -b y
              (lambda _
                (invoke "make" "ptcheck")))))))
     (synopsis "Programs and libraries for graph algorithms (with MPI)")))
+
+(define-public pt-scotch-mpich
+  (package
+    (inherit pt-scotch)
+    (name "pt-scotch-mpich")
+    (inputs
+     `(("mpi" ,mpich)
+       ,@(alist-delete "mpi" (package-inputs pt-scotch))))))
 
 (define-public pt-scotch32
   (package (inherit scotch32)
