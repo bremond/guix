@@ -491,7 +491,7 @@ networks (10 Gigabit Ethernet, InfiniBand, Myrinet, Quadrics) and
 proprietary high-end computing systems (Blue Gene, Cray) and (2) to
 enable cutting-edge research in MPI through an easy-to-extend modular
 framework for other derived implementations.")
-     (license bsd-2)))
+     (license license:bsd-2)))
 
 (define-public python-mpi4py-mpich
   (package
