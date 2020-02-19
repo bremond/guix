@@ -37,6 +37,7 @@
   #:use-module (gnu packages autogen)
   #:use-module (gnu packages autotools)
   #:use-module (gnu packages base)
+  #:use-module (gnu packages compression)
   #:use-module (gnu packages bash)
   #:use-module (gnu packages fabric-management)
   #:use-module (gnu packages gawk)
