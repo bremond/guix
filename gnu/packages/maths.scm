@@ -626,6 +626,7 @@ problems in numerical linear algebra.")
     (build-system cmake-build-system)
     (inputs
      `(("mpi" ,openmpi)
+       ("strace" ,strace)
        ("fortran" ,gfortran)
        ("lapack" ,lapack)))             ;for testing only
     (arguments
