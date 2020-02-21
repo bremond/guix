@@ -33,6 +33,7 @@
   #:use-module (guix deprecation)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
+  #:use-module (guix hg-download)
   #:use-module (gnu packages)
   #:use-module (gnu packages autogen)
   #:use-module (gnu packages autotools)
