@@ -578,3 +578,42 @@ Gigabit Ethernet, InfiniBand, Myrinet, Quadrics), and proprietary high-end
 computing systems (Blue Gene, Cray).  It enables research in MPI through a
 modular framework for other derived implementations.")
     (license license:bsd-2)))
+
+(define-public adjoinable-mpi
+  (package
+    (name "adjoinable-mpi")
+    (version "0.1")
+    (source
+     (origin
+       (method hg-fetch)
+       (uri (hg-reference
+             (url "https://mercurial.mcs.anl.gov/ad/AdjoinableMPI")
+             (changeset "0344165592f5")))
+       (sha256
+        (base32
+         "1dgxn8x59qkfa18xs8pcar51g82y97xbkswm58sfrd5hcchxjvb8"))))
+    (build-system gnu-build-system)
+    (native-inputs
+     `(("autoconf" ,autoconf)
+       ("automake" ,automake)
+       ("libtool" ,libtool)
+       ("gnu-make" ,gnu-make)
+       ("gcc" ,gcc)
+       ("gfortran" ,gfortran)))
+    (inputs
+     `(("mpi" ,mpich)))
+    (outputs '("out" "debug"))
+    (arguments
+     `(#:configure-flags
+       '("--enable-fortranCompatible" "--with-gnu-ld" "--enable-debug")
+       #:tests? #f))
+    (synopsis "The Adjoinable MPI (AMPI) library for automatic
+differentiation of MPI program.")
+    (home-page "https://www.mcs.anl.gov/~utke/AdjoinableMPI/AdjoinableMPIDox/index.html")
+    (description "The Adjoinable MPI (AMPI) library provides a
+modified set of MPI subroutines that are constructed such that an
+adjoint in the context of algorithmic differentiation (AD) can be
+computed. The library is designed to be supported by a variety of AD
+tools and to enable also the computation of (higher-order) forward
+derivatives.")
+    (license license:x11-style)))
