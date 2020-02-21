@@ -1,0 +1,81 @@
+From 25bc70a04ae362009547ae8b0c648f500268f9a8 Mon Sep 17 00:00:00 2001
+From: Maurice Bremond <Maurice.Bremond@inria.fr>
+Date: Thu, 13 Feb 2020 11:50:55 +0100
+Subject: [PATCH] gnu: mumps fix 5.1.2 -> 5.2.1 for lib files
+
+---
+ gnu/packages/maths.scm                   | 2 +-
+ gnu/packages/patches/shared-libseq.patch | 2 +-
+ gnu/packages/patches/shared-mumps.patch  | 8 ++++----
+ gnu/packages/patches/shared-pord.patch   | 4 ++--
+ 4 files changed, 8 insertions(+), 8 deletions(-)
+
+diff --git a/gnu/packages/maths.scm b/gnu/packages/maths.scm
+index 8e44233fb4..c255ac65b5 100644
+--- a/gnu/packages/maths.scm
++++ b/gnu/packages/maths.scm
+@@ -2294,7 +2294,7 @@ IORDERINGSC  = $(IPORD) $(IMETIS) $(ISCOTCH)"
+                (copy-recursively "lib" libdir)
+                (every
+                 (lambda (prec)
+-                  (augment-rpath (string-append libdir "/lib" prec "mumps-5.1.2.so") libdir))
++                  (augment-rpath (string-append libdir "/lib" prec "mumps-5.2.1.so") libdir))
+                 '("s" "d" "c" "z"))
+                (augment-rpath (string-append libdir "/libmumps_common.so") libdir)
+                (copy-recursively "include" (string-append out "/include"))
+diff --git a/gnu/packages/patches/shared-libseq.patch b/gnu/packages/patches/shared-libseq.patch
+index feafcf123b..eccf528f7a 100644
+--- a/gnu/packages/patches/shared-libseq.patch
++++ b/gnu/packages/patches/shared-libseq.patch
+@@ -17,7 +17,7 @@ Index: mumps/libseq/Makefile
+ +	$(AR) $@ mpi.o mpic.o elapse.o
+  	$(RANLIB) $@
+ +libmpiseq$(PLAT).so: mpi.o mpic.o elapse.o
+-+	$(FC) -shared $^ -Wl,-soname,libmpiseq$(PLAT)-5.1.2.so -o libmpiseq$(PLAT)-5.1.2.so -Wl,-z,defs
+++	$(FC) -shared $^ -Wl,-soname,libmpiseq$(PLAT)-5.2.1.so -o libmpiseq$(PLAT)-5.2.1.so -Wl,-z,defs
+  .f.o:
+ -	$(FC) $(OPTF)              -c $*.f $(OUTF)$*.o
+ +	$(FC) $(OPTF)              -fPIC -c $*.f $(OUTF)$*.o
+diff --git a/gnu/packages/patches/shared-mumps.patch b/gnu/packages/patches/shared-mumps.patch
+index 9e2491f300..d94ccf6ce9 100644
+--- a/gnu/packages/patches/shared-mumps.patch
++++ b/gnu/packages/patches/shared-mumps.patch
+@@ -30,16 +30,16 @@ Index: mumps/src/Makefile
+ -$(libdir)/lib$(ARITH)mumps$(PLAT)$(LIBEXT):    $(OBJS_MOD) $(OBJS_OTHER)
+ -	$(AR)$@ $?
+ +$(libdir)/libmumps_common$(PLAT).so:      $(OBJS_COMMON_MOD) $(OBJS_COMMON_OTHER)
+-+	$(FC) -shared $^ -Wl,-soname,libmumps_common$(PLAT)-5.1.2.so -L$(libdir) $(LORDERINGS) -lpthread $(MPIFLIB) $(MPICLIB) $(LEXTRAS) -o $(libdir)/libmumps_common$(PLAT)-5.1.2.so -Wl,-z,defs
+-+	ln -s libmumps_common$(PLAT)-5.1.2.so $@
+++	$(FC) -shared $^ -Wl,-soname,libmumps_common$(PLAT)-5.2.1.so -L$(libdir) $(LORDERINGS) -lpthread $(MPIFLIB) $(MPICLIB) $(LEXTRAS) -o $(libdir)/libmumps_common$(PLAT)-5.2.1.so -Wl,-z,defs
+++	ln -s libmumps_common$(PLAT)-5.2.1.so $@
+ +
+ +$(libdir)/lib$(ARITH)mumps$(PLAT).a:    $(OBJS_MOD) $(OBJS_OTHER)
+ +	$(AR) $@ $?
+  	$(RANLIB) $@
+  
+ +$(libdir)/lib$(ARITH)mumps$(PLAT).so:    $(OBJS_MOD) $(OBJS_OTHER)
+-+	$(FC) -shared $^ -Wl,-soname,lib$(ARITH)mumps$(PLAT)-5.1.2.so -L$(libdir) -lmumps_common$(PLAT) $(LORDERINGS) $(MPIFLIB) $(LEXTRAS) $(LIBBLAS) $(SCALAP) $(LAPACK) -o $(libdir)/lib$(ARITH)mumps$(PLAT)-5.1.2.so -Wl,-z,defs
+-+	ln -s lib$(ARITH)mumps$(PLAT)-5.1.2.so $@
+++	$(FC) -shared $^ -Wl,-soname,lib$(ARITH)mumps$(PLAT)-5.2.1.so -L$(libdir) -lmumps_common$(PLAT) $(LORDERINGS) $(MPIFLIB) $(LEXTRAS) $(LIBBLAS) $(SCALAP) $(LAPACK) -o $(libdir)/lib$(ARITH)mumps$(PLAT)-5.2.1.so -Wl,-z,defs
+++	ln -s lib$(ARITH)mumps$(PLAT)-5.2.1.so $@
+ +
+  # Dependencies between modules:
+  $(ARITH)mumps_load.o:		$(ARITH)mumps_comm_buffer.o \
+diff --git a/gnu/packages/patches/shared-pord.patch b/gnu/packages/patches/shared-pord.patch
+index 48062d4f89..d3915b0ad9 100644
+--- a/gnu/packages/patches/shared-pord.patch
++++ b/gnu/packages/patches/shared-pord.patch
+@@ -24,8 +24,8 @@ Index: mumps/PORD/lib/Makefile
+  	$(RANLIB) $@
+  
+ +libpord$(PLAT).so: $(OBJS)
+-+	$(CC) -shared $(OBJS) -Wl,-soname,libpord$(PLAT)-5.1.2.so -o libpord$(PLAT)-5.1.2.so -Wl,-z,defs
+-+	ln -s libpord$(PLAT)-5.1.2.so $@
+++	$(CC) -shared $(OBJS) -Wl,-soname,libpord$(PLAT)-5.2.1.so -o libpord$(PLAT)-5.2.1.so -Wl,-z,defs
+++	ln -s libpord$(PLAT)-5.2.1.so $@
+ +
+  clean:
+  	rm -f *.o
+-- 
+2.17.1
+
