@@ -587,7 +587,7 @@ modular framework for other derived implementations.")
      (origin
        (method git-fetch)
        (uri (git-reference
-             (url "https://gitlab.inria.fr/bremond/adjoinablempi")
+             (url "https://github.com/bremond/adjoinablempi")
              (commit"30c3a638807eafbb73d4df17e327c2225cf6bf0f")))
        (sha256
         (base32
