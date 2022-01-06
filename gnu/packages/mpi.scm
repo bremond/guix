@@ -591,7 +591,7 @@ modular framework for other derived implementations.")
              (commit"30c3a638807eafbb73d4df17e327c2225cf6bf0f")))
        (sha256
         (base32
-         "1dgxn8x59qkfa18xs8pcar51g82y97xbkswm58sfrd5hcchxjvb8"))))
+         "1snk8dd3k8shbihzg3yq1kdqjimd11biypzgx9sc351wxa9si2gf"))))
     (build-system gnu-build-system)
     (native-inputs
      `(("autoconf" ,autoconf)
