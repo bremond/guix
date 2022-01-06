@@ -33,7 +33,6 @@
   #:use-module (guix deprecation)
   #:use-module (guix build-system gnu)
   #:use-module (guix build-system python)
-  #:use-module (guix hg-download)
   #:use-module (gnu packages)
   #:use-module (gnu packages autogen)
   #:use-module (gnu packages autotools)
@@ -586,10 +585,10 @@ modular framework for other derived implementations.")
     (version "0.1")
     (source
      (origin
-       (method hg-fetch)
-       (uri (hg-reference
-             (url "https://mercurial.mcs.anl.gov/ad/AdjoinableMPI")
-             (changeset "0344165592f5")))
+       (method git-fetch)
+       (uri (git-reference
+             (url "https://gitlab.inria.fr/bremond/adjoinablempi")
+             (commit"30c3a638807eafbb73d4df17e327c2225cf6bf0f")))
        (sha256
         (base32
          "1dgxn8x59qkfa18xs8pcar51g82y97xbkswm58sfrd5hcchxjvb8"))))
